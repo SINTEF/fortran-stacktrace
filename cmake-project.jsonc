@@ -1,0 +1,17 @@
+{
+    "name": "fortran-stacktrace",
+    "version": "0.1.0",
+    "languages": ["Fortran", "CXX"],
+    "linker_language": "Fortran",
+    "c++std": "17",
+    // When set to true, information for stacktrace generation will be included in release builds
+    "release_dbg_info": true,
+
+    "dependencies": {
+        // "error-handling": { "git": "https://github.com/SINTEF/fortran-error-handling.git", "version": "0.1.0"}
+        "fortran-error-handling": { "git": "git@github.com:SINTEF/fortran-error-handling.git", "version": "0.1.0", "tag": "main" }
+    },
+
+    "dev-dependencies": {}
+
+}

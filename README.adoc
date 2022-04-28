@@ -1,0 +1,171 @@
+= Fortran Stacktrace
+:imagesdir: doc/
+
+This library enables generation of stacktraces for Fortran.
+It does so by providing a Fortran wrapper around the C++ library
+https://github.com/bombela/backward-cpp[backward-cpp].
+
+It also integrates with the Fortran
+https://github.com/SINTEF/fortran-error-handling[error-handling] library in order
+to generate errors that includes a stacktrace.
+This means that you can easily make even old legacy code output errors messages like this:
+
+image::stacktrace-example.png[]
+
+The source code snippets are of course voluntary and only available on a machine
+with access to the source code itself.
+
+
+== Building
+
+A fairly recent Fortran and C++ compiler is required to build this library.
+The following compilers are known to work:
+
+- gfortran version 9 or later
+- Intel Fortran 2021 or later
+
+NOTE: Stacktraces are currently not enabled for gcc/gfortran when using MinGW
+on Windows.
+It seems like backward-cpp should support this, but I haven't figured out how to get it
+working. Pull requests are welcome if anyone wants to have a look at this!
+
+In order to get proper stacktraces you also need to *compile your source code with
+debug information*. To do this use the following compiler flags
+|===
+| Compiler Vendor | Operating System | Compiler flag | Link flag
+| GCC             | Linux            | `-g`          |
+| Intel           | Linux            | `-g`          |
+| Intel           | Windows          | `-Z7`         | `-debug`
+|===
+
+This will increase the binary size slightly, but contrary to popular belief it should
+*not* impact performance of your code!
+
+On Linux, you also need to install binutils-dev which contains libbfd:
+[source,bash]
+----
+apt-get install binutils-dev # or the equivalent for your distro
+----
+
+For more information see also the https://github.com/bombela/backward-cpp[backward-cpp]
+documentation.
+
+=== CMake
+
+First, enable both Fortran and CXX as languages in your project:
+
+[source,cmake]
+----
+project(<your project name> LANGUAGES Fortran CXX)
+----
+
+Or:
+
+[source,cmake]
+----
+enable_language("Fortran")
+enable_language("CXX")
+----
+
+To use the recommended compiler and link flags you can for example do the following:
+
+[source,cmake]
+----
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    set(CMAKE_Fortran_FLAGS "-g")
+    if(WIN32)
+        set(CMAKE_EXE_LINKER_FLAGS "-debug")
+    endif(WIN32)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+    if(WIN32)
+        set(CMAKE_Fortran_FLAGS "-Z7")
+        set(CMAKE_EXE_LINKER_FLAGS "-debug")
+    else(WIN32)
+        set(CMAKE_Fortran_FLAGS "-g")
+    endif(WIN32)
+endif()
+----
+
+This example is not complete, but can be used as a starting point.
+Add other compiler flags depending on your project needs.
+
+The recommended way of getting the source code for this library when using CMake
+is to add it as a dependency using
+https://github.com/cpm-cmake/CPM.cmake/[CMake Package Manager (CPM)]:
+
+[source,cmake]
+----
+CPMAddPackage("https://github.com/SINTEF/fortran-stacktrace.git@0.1.0")
+target_link_libraries(<your target> fortran-stacktrace)
+----
+
+
+=== CMake Without CPM
+
+If you don't want to use CPM you can either use
+https://cmake.org/cmake/help/latest/module/FetchContent.html[FetchContent]
+manually or add this repo as a git submodule to your project. Then in your
+`CMakeLists.txt` add it as a subdirectory and use `target_link_libraries` to
+link against `fortran-stacktrace`.
+
+Do however note that this library will still use CPM to add
+https://github.com/SINTEF/fortran-error-handling[fortran-error-handling]
+as its dependency.
+
+=== Fortran Package Manager (FPM)
+
+FPM is currently not supported as it is not yet able to compile C++ sources.
+
+
+== Usage
+
+=== Error Handling Integration
+
+It is possible to make errors created with the
+https://github.com/SINTEF/fortran-error-handling[fortran-error-handling]
+library contain a stacktrace.
+To do this, add the following code near the top of your program,
+preferably before any errors may occur:
+
+[source, Fortran]
+----
+program main
+    use error_handling, only: set_error_hook
+    use stacktrace_mod, only: stacktrace_error_hook_t
+    implicit none
+
+    call set_error_hook(stacktrace_error_hook_t())
+
+    ! (...)
+end program
+----
+
+For a complete example, see link:example/error-handling-integration.f90[`error-handling-integration.f90`].
+
+=== Generating Stacktraces
+
+To generate a stacktrace from an arbitrary code location, do the following:
+
+[source,fortran]
+----
+use stacktrace_mod, only: stacktrace_t
+
+type(stacktrace_t) :: st
+character(len=:), allocatable :: chars
+
+! Load a stacktrace from this point
+call st%load_here()
+
+! Convert the stacktrace into character, e.g. for writing to a log file.
+! `snippet=.false.` disables snippet generation even when sources are available
+chars = st%display(snippet=.false.)
+write(*,'(a)') chars
+----
+
+
+== License and Copyright
+
+Copyright 2022 SINTEF Ocean AS. All Rights Reserved. MIT License.
+
+https://github.com/bombela/backward-cpp[backward-cpp] is redistributed by this project.
+Copyright 2013-2017 Google Inc. All Rights Reserved. MIT License.
