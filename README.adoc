@@ -1,6 +1,12 @@
 = Fortran Stacktrace
 :imagesdir: doc/
 
+:repo: SINTEF/fortran-stacktrace
+**Generate stacktraces in Fortran**
+
+image:https://github.com/{repo}/actions/workflows/built-test.yml/badge.svg[link="https://github.com/{repo}/actions/workflows/built-test.yml"]
+image:https://img.shields.io/github/v/release/{repo}?label=version&sort=semver[link="https://github.com/{repo}/releases"]
+
 This library enables generation of stacktraces for Fortran.
 It does so by providing a Fortran wrapper around the C++ library
 https://github.com/bombela/backward-cpp[backward-cpp].
@@ -96,7 +102,7 @@ https://github.com/cpm-cmake/CPM.cmake/[CMake Package Manager (CPM)]:
 [source,cmake]
 ----
 CPMAddPackage("https://github.com/SINTEF/fortran-stacktrace.git@0.1.0")
-target_link_libraries(<your target> fortran-stacktrace)
+target_link_libraries(<your target> stacktrace)
 ----
 
 
@@ -106,7 +112,7 @@ If you don't want to use CPM you can either use
 https://cmake.org/cmake/help/latest/module/FetchContent.html[FetchContent]
 manually or add this repo as a git submodule to your project. Then in your
 `CMakeLists.txt` add it as a subdirectory and use `target_link_libraries` to
-link against `fortran-stacktrace`.
+link against `stacktrace`.
 
 Do however note that this library will still use CPM to add
 https://github.com/SINTEF/fortran-error-handling[fortran-error-handling]
