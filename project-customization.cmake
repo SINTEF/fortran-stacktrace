@@ -5,7 +5,7 @@ target_compile_definitions(stacktrace PRIVATE
 if (DEFINED CPM_SOURCE_CACHE)
     cmake_path(IS_ABSOLUTE CPM_SOURCE_CACHE is_absolute)
     if(is_absolute)
-        target_compile_definitions(fortran-stacktrace PRIVATE
+        target_compile_definitions(stacktrace PRIVATE
             SOURCE_ROOT3=${CPM_SOURCE_CACHE})
     endif()
 endif()
@@ -29,14 +29,14 @@ else()
     # set(dirs ${LIBDWARF_INCLUDE_DIRS})
     # set(libs dw)
     # set(dirs "")
-    # target_compile_definitions(fortran-stacktrace PRIVATE BACKWARD_HAS_DWARF=1)
+    # target_compile_definitions(stacktrace PRIVATE BACKWARD_HAS_DWARF=1)
 
-    # target_link_libraries(fortran-stacktrace PRIVATE ${libs})
-    # target_include_directories(fortran-stacktrace PRIVATE ${dirs})
-    # target_compile_definitions(fortran-stacktrace PRIVATE
+    # target_link_libraries(stacktrace PRIVATE ${libs})
+    # target_include_directories(stacktrace PRIVATE ${dirs})
+    # target_compile_definitions(stacktrace PRIVATE
         # ENABLE_STACKTRACE=1)
-    # target_link_libraries(fortran-stacktrace dw)
-    # target_compile_definitions(fortran-stacktrace PRIVATE BACKWARD_HAS_DW=1)
+    # target_link_libraries(stacktrace dw)
+    # target_compile_definitions(stacktrace PRIVATE BACKWARD_HAS_DW=1)
     find_library(BFD bfd)
     if(BFD)
         target_compile_definitions(stacktrace PRIVATE BACKWARD_HAS_BFD=1)
