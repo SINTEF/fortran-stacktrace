@@ -125,6 +125,15 @@ FPM is currently not supported as it is not yet able to compile C++ sources.
 
 == Usage
 
+WARNING: The procedures for loading and displaying a stacktrace is declared as pure
+         however they do invoke C++ code which by definition cannot be pure.
+         This is possible because the c-bindings are declared pure which is done by
+         hand.
+         The procedures does not have any side effects, which is the intent for
+         of pure procedures in Fortran.
+         If you are not comfortable with this way of stretching the definition of
+         `pure`, don't use `stacktrace_t` in pure procedures!
+
 === Error Handling Integration
 
 It is possible to make errors created with the
