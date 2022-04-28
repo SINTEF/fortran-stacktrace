@@ -1,5 +1,5 @@
 # Source roots to relativize filenames against
-target_compile_definitions(fortran-stacktrace PRIVATE
+target_compile_definitions(stacktrace PRIVATE
     SOURCE_ROOT1=${CMAKE_SOURCE_DIR} SOURCE_ROOT2=${CMAKE_BINARY_DIR})
 # CPM stores source path as absoule path. If it is not, CPM has not been loaded
 if (DEFINED CPM_SOURCE_CACHE)
@@ -12,7 +12,7 @@ endif()
 
 # Link against dependent libraries
 if(WIN32)
-    target_link_libraries(fortran-stacktrace PRIVATE imagehlp)
+    target_link_libraries(stacktrace PRIVATE imagehlp)
 else()
     # Maybe we should add some option to control this for the user..?
 
@@ -39,8 +39,8 @@ else()
     # target_compile_definitions(fortran-stacktrace PRIVATE BACKWARD_HAS_DW=1)
     find_library(BFD bfd)
     if(BFD)
-        target_compile_definitions(fortran-stacktrace PRIVATE BACKWARD_HAS_BFD=1)
-        target_link_libraries(fortran-stacktrace PRIVATE ${BFD} dl)
+        target_compile_definitions(stacktrace PRIVATE BACKWARD_HAS_BFD=1)
+        target_link_libraries(stacktrace PRIVATE ${BFD} dl)
     else()
         message(WARNING "libbfd not found. Stacktrace generation will be disabled!")
     endif()
