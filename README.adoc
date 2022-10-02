@@ -134,6 +134,12 @@ WARNING: The procedures for loading and displaying a stacktrace is declared as p
          If you are not comfortable with this way of stretching the definition of
          `pure`, don't use `stacktrace_t` in pure procedures!
 
+WARNING: As of this writing, the latest gfortran versions has bugs related to
+         user defined finalization of derived types. In order to avoid crashes
+         like segmentation faults due to this, finalization is currently disabled
+         when gfortran is used. As a result there will be a memory leak if a
+         loaded `stacktrace_t` is deallocated or goes out of scope.
+
 === Error Handling Integration
 
 It is possible to make errors created with the
@@ -173,7 +179,7 @@ call st%load_here()
 
 ! Convert the stacktrace into character, e.g. for writing to a log file.
 ! `snippet=.false.` disables snippet generation even when sources are available
-chars = st%display(snippet=.false.)
+chars = st%to_chars(snippet=.false.)
 write(*,'(a)') chars
 ----
 
