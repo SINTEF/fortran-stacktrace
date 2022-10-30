@@ -10,6 +10,6 @@ program generating_stacktrace
 
     ! Convert the stacktrace into character, e.g. for writing to console a log file.
     ! `snippet=.false.` disables snippet generation even when sources are available
-    chars = st%display(snippet=.false.)
+    chars = st%to_chars(snippet=.false.)
     write(*,'(a)') chars
 end program

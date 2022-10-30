@@ -1,6 +1,6 @@
 {
     "name": "stacktrace",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "languages": ["Fortran", "CXX"],
     "linker_language": "Fortran",
     "c++std": "17",
@@ -8,7 +8,7 @@
     "release_dbg_info": true,
 
     "dependencies": {
-        "error-handling": { "git": "https://github.com/SINTEF/fortran-error-handling.git", "version": "0.1.0"}
+        "error-handling": { "git": "https://github.com/SINTEF/fortran-error-handling.git", "version": "0.2.0"}
     },
 
     "dev-dependencies": {}

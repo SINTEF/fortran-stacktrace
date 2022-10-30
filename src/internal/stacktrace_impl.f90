@@ -80,12 +80,16 @@ contains
         type(stacktrace_t), intent(inout) :: this
 
         if (c_associated(this%c_obj)) then
-            call stacktrace__destruct(this%c_obj)
+            ! Gfortran has bugs related to derived type finalization, accepting
+            ! memory leak for now
+#           ifndef __GFORTRAN__
+                call stacktrace__destruct(this%c_obj)
+#           endif
         end if
     end subroutine
 
 
-    pure module function display(this, snippet) result(chars)
+    pure module function to_chars(this, snippet) result(chars)
         class(stacktrace_t), intent(in) :: this
         logical, optional, intent(in) :: snippet
         character(len=:), allocatable :: chars

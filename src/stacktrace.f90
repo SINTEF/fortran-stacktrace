@@ -8,8 +8,8 @@ module stacktrace_mod
     use error_handling, only: &
         error_hook_t, &
         error_handler_t, &
-        fail_reason_t, &
-        fail_reason_ctr_t
+        error_chain_t, &
+        error_t
     implicit none
 
     private
@@ -18,17 +18,19 @@ module stacktrace_mod
     public stacktrace_error_handler_t
 
 
-    !
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Stacktrace generation
-    !
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    !> Type for generating and holding a stacktrace
+    !!
+    !! The stacktrace is generated from the point where load_here is called
     type :: stacktrace_t
-        !> Type for generating a stacktrace from the point where load_here is called
         private
         type(c_ptr) :: c_obj = c_null_ptr
     contains
         procedure :: load_here
-        procedure :: display
+        procedure :: to_chars
 
         generic :: assignment(=) => assign
         procedure, private :: assign
@@ -49,7 +51,7 @@ module stacktrace_mod
 
 
         !> Generate a character string with the stacktrace in it
-        pure module function display(this, snippet) result(chars)
+        pure module function to_chars(this, snippet) result(chars)
             class(stacktrace_t), intent(in) :: this
             !> Should source code snippets be included, if they are available? Default: True
             logical, optional, intent(in) :: snippet
@@ -69,14 +71,13 @@ module stacktrace_mod
     end interface
 
 
-    !
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Error handling integration
-    !
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    !> Custom hook for fortran-error-handling to include a stacktrace in errors.
     type, extends(error_hook_t) :: stacktrace_error_hook_t
-        !> Custom hook for fortran-error-handling to include a stacktrace in errors.
-
-        !> Should stacktrace include snippets? Default: True
+        !> Should stacktrace include snippets when available? Default: True
         logical :: snippet = .true.
     contains
         procedure :: create_handler
@@ -84,33 +85,34 @@ module stacktrace_mod
 
 
     interface
-        pure module subroutine create_handler(this, root_cause, handler)
+        pure module function create_handler(this, error) result(handler)
             class(stacktrace_error_hook_t), intent(in) :: this
-            class(fail_reason_t), intent(in) :: root_cause
-            class(error_handler_t), allocatable, intent(inout) :: handler
-        end subroutine
+            class(error_t), intent(in) :: error
+            class(error_handler_t), allocatable :: handler
+        end function
     end interface
 
 
-    ! This is for some reason needed to avoid crashes with Intel Fortran. Compiler bug?
+    ! This is for some reason needed to avoid crashes with Intel Fortran.
+    ! Compiler bug? Incorrect code?
     type :: stacktrace_ctr_t
         type(stacktrace_t) :: st
     end type
 
 
+    !> Error handler which can hold a stacktrace
     type, extends(error_handler_t) :: stacktrace_error_handler_t
         type(stacktrace_ctr_t), allocatable :: stacktrace
         logical :: snippet
     contains
-        procedure :: display => display_handler
+        procedure :: format_error
     end type
 
 
     interface
-        pure module function display_handler(this, root_cause, chain) result(chars)
+        pure module function format_error(this, chain) result(chars)
             class(stacktrace_error_handler_t), intent(in) :: this
-            class(fail_reason_t), intent(in) :: root_cause
-            type(fail_reason_ctr_t), intent(in) :: chain(:)
+            type(error_chain_t), intent(in) :: chain
             character(len=:), allocatable :: chars
         end function
     end interface
